@@ -5,12 +5,10 @@ import {
   Routes,
   NavLink,
   useLocation,
+  useNavigate,
 } from 'react-router-dom';
-import { createBrowserHistory } from 'history';
 import * as api from '../../apiServise/apiServise';
 import s from './MovieInfo.module.css';
-// import Cast from '../Cast/Cast';
-// import Reviews from '../Reviews/Reviews';
 import BackBtn from 'components/BackBtn/BackBtn';
 
 const Cast = lazy(() =>
@@ -24,14 +22,15 @@ export default function MovieInfo() {
   const { movieId } = useParams();
   const [movie, setMovie] = useState([]);
   const location = useLocation();
-  const history = createBrowserHistory({ window });
   const { title, genres, overview, vote_average } = movie;
   const userScore = vote_average * 10;
   const src = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`;
   let movieGenres = [];
+  const [page] = useState(location.state.from);
+  let navigate = useNavigate();
 
   function onClick() {
-    history.back();
+    navigate(page);
   }
 
   if (genres) {
@@ -61,10 +60,8 @@ export default function MovieInfo() {
           <h3 className={s.title}>Additional information</h3>
           <nav className={s.nav}>
             <NavLink
-              to={{
-                pathname: `/movies/${movieId}/cast`,
-                state: { from: location },
-              }}
+              to={`cast`}
+              state={{ from: location }}
               className={s.navItem}
               style={({ isActive }) => ({
                 color: isActive ? 'purple' : 'black',
@@ -73,10 +70,8 @@ export default function MovieInfo() {
               Cast
             </NavLink>
             <NavLink
-              to={{
-                pathname: `/movies/${movieId}/reviews`,
-                state: { from: location },
-              }}
+              to={`reviews`}
+              state={{ from: location }}
               className={s.navItem}
               style={({ isActive }) => ({
                 color: isActive ? 'purple' : 'black',

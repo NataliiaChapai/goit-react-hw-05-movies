@@ -7,7 +7,7 @@ import MovieList from 'components/MovieList/MovieList';
 
 export default function MovieSearch() {
   const location = useLocation();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const history = createBrowserHistory({ window });
   const [searchMovies, setSearchMovies] = useState([]);
   const [query, setQuery] = useState('');
@@ -33,7 +33,7 @@ export default function MovieSearch() {
     });
 
     fetchMovies(query);
-    setQuery('');
+    setParams(`query=${query}`);
   }
 
   useEffect(() => {
