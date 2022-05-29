@@ -1,43 +1,55 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
-import SearchMovieList from '../SearchMovieList/SearchMovieList';
+import * as api from '../../apiServise/apiServise';
 import s from './MovieSearch.module.css';
+import MovieList from 'components/MovieList/MovieList';
 
 export default function MovieSearch() {
-  const [query, setQuery] = useState('');
-  const [input, setInput] = useState('');
-  const [params] = useSearchParams();
   const location = useLocation();
+  const [params] = useSearchParams();
   const history = createBrowserHistory({ window });
+  const [searchMovies, setSearchMovies] = useState([]);
+  const [query, setQuery] = useState('');
 
-  useEffect(() => {
-    setQuery(params.get('query'));
-  }, [params]);
+  function fetchMovies(query) {
+    api.fetchSearchMovies(query).then(data => setSearchMovies(data.results));
+  }
 
   function onChange(event) {
-    setInput(event.target.value.toLowerCase());
+    setQuery(event.target.value.toLowerCase());
   }
 
   function onSubmit(event) {
     event.preventDefault();
-    if (input.trim() === '') {
+
+    if (query.trim() === '') {
       return;
     }
-    setQuery(input);
-    setInput('');
+
     history.push({
       ...location,
-      search: `?query=${input}`,
+      search: `query=${query}`,
     });
+
+    fetchMovies(query);
+    setQuery('');
   }
+
+  useEffect(() => {
+    const query = params.get('query');
+    if (query) {
+      setQuery(query);
+      fetchMovies(query);
+    }
+  }, [params]);
 
   return (
     <>
       <form onSubmit={onSubmit} className={s.form}>
         <input
           name="name"
-          value={input}
+          value={query}
           className={s.input}
           type="text"
           autoComplete="off"
@@ -49,7 +61,7 @@ export default function MovieSearch() {
           Search
         </button>
       </form>
-      {query && <SearchMovieList query={query} />}
+      {searchMovies && <MovieList movies={searchMovies} />}
     </>
   );
 }

@@ -1,21 +1,41 @@
-import { useEffect, useState } from 'react';
-import { useParams, Route, Routes, NavLink } from 'react-router-dom';
+import { useEffect, useState, lazy, Suspense } from 'react';
+import {
+  useParams,
+  Route,
+  Routes,
+  NavLink,
+  useLocation,
+} from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import * as api from '../../apiServise/apiServise';
 import s from './MovieInfo.module.css';
-import Cast from '../Cast/Cast';
-import Reviews from '../Reviews/Reviews';
+// import Cast from '../Cast/Cast';
+// import Reviews from '../Reviews/Reviews';
+import BackBtn from 'components/BackBtn/BackBtn';
 
-// import MoreMovieInfo from '../MoreMovieInfo/MoreMovieInfo'
+const Cast = lazy(() =>
+  import('../Cast/Cast.js' /* webpackChunkName: "cast-view" */)
+);
+const Reviews = lazy(() =>
+  import('../Reviews/Reviews.js' /* webpackChunkName: "reviews-view" */)
+);
 
 export default function MovieInfo() {
   const { movieId } = useParams();
-  const [movie, setMovie] = useState('');
-  const userScore = movie.vote_average * 10;
+  const [movie, setMovie] = useState([]);
+  const location = useLocation();
+  const history = createBrowserHistory({ window });
+  const { title, genres, overview, vote_average } = movie;
+  const userScore = vote_average * 10;
   const src = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`;
   let movieGenres = [];
 
-  if (movie.genres) {
-    movie.genres.map(genre => movieGenres.push(genre.name));
+  function onClick() {
+    history.back();
+  }
+
+  if (genres) {
+    movie.genres.map(({ name }) => movieGenres.push(name));
   }
 
   useEffect(() => {
@@ -25,13 +45,14 @@ export default function MovieInfo() {
   return (
     movie && (
       <>
+        <BackBtn onClick={onClick} />
         <div className={s.wrapper}>
           <img src={src} alt={movie.title} className={s.img} />
           <div className={s.info}>
-            <h2 className={s.title}>{movie.title}</h2>
+            <h2 className={s.title}>{title}</h2>
             <p className={s.text}>User score: {userScore}%</p>
             <h3 className={s.title}>Overview</h3>
-            <p className={s.text}>{movie.overview}</p>
+            <p className={s.text}>{overview}</p>
             <h3 className={s.title}>Genres</h3>
             <p className={s.text}>{movieGenres.join(', ')}</p>
           </div>
@@ -40,7 +61,10 @@ export default function MovieInfo() {
           <h3 className={s.title}>Additional information</h3>
           <nav className={s.nav}>
             <NavLink
-              to={`/movies/${movieId}/cast`}
+              to={{
+                pathname: `/movies/${movieId}/cast`,
+                state: { from: location },
+              }}
               className={s.navItem}
               style={({ isActive }) => ({
                 color: isActive ? 'purple' : 'black',
@@ -49,7 +73,10 @@ export default function MovieInfo() {
               Cast
             </NavLink>
             <NavLink
-              to={`/movies/${movieId}/reviews`}
+              to={{
+                pathname: `/movies/${movieId}/reviews`,
+                state: { from: location },
+              }}
               className={s.navItem}
               style={({ isActive }) => ({
                 color: isActive ? 'purple' : 'black',
@@ -58,11 +85,12 @@ export default function MovieInfo() {
               Reviews
             </NavLink>
           </nav>
-
-          <Routes>
-            <Route exact path="/cast" element={<Cast />} />
-            <Route path="/reviews" element={<Reviews />} />
-          </Routes>
+          <Suspense fallback={<div>Please wait...</div>}>
+            <Routes>
+              <Route exact path="/cast" element={<Cast />} />
+              <Route path="/reviews" element={<Reviews />} />
+            </Routes>
+          </Suspense>
         </div>
       </>
     )

@@ -15,10 +15,10 @@ export default function Reviews() {
     <p className={s.text}>We don't have any reviews for this movie</p>
   ) : (
     <ul className={s.list}>
-      {reviews.map(review => (
-        <li key={review.id}>
-          <h3 className={s.title}>{review.author}</h3>
-          <p className={s.text}>{review.content}</p>
+      {reviews.map(({ id, author, content }) => (
+        <li key={id}>
+          <h3 className={s.title}>{author}</h3>
+          <p className={s.text}>{content}</p>
         </li>
       ))}
     </ul>

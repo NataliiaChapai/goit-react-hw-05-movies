@@ -1,19 +1,9 @@
-.form {
-  padding: 20px;
-}
-
-.input {
-  outline: none;
-  padding: 5px;
-  margin-right: 20px;
-  width: 200px;
-}
-
 .button {
   padding: 5px;
   width: 100px;
   background-color: rgba(128, 0, 128, 0.285);
   border-radius: 3px;
+  margin-bottom: 15px;
   cursor: pointer;
 }
 
